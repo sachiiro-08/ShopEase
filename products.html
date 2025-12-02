@@ -1,0 +1,219 @@
+<!Doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ShopEase — Products</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+    <nav class="navbar">
+        <a class="logo" href="index.html">ShopEase</a>
+        <ul class="nav-links" id="authNavLinks">
+        </ul>
+    </nav>
+
+    <main class="container">
+        <div class="page-head">
+            <h1>Shop All Products</h1>
+            <div class="controls">
+                    <input class="search-input" id="searchInput" placeholder="Search products..." type="search" />
+                    <input id="categorySelectc" list="categoryOptions" name="category" placeholder="Category">
+                        <datalist id="categoryOptions">
+                            <option value="Clothing">Clothing</option>
+                            <option value="Food">Food</option>
+                            <option value="Books">Books</option>
+                            <option value="Stationery">Stationery</option>
+                        </datalist>
+            </div>
+        </div>
+
+        <div id="productsGrid" class="products-container"></div>
+
+        <div id="listEmpty" class="empty hidden">No products found.</div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2025 ShopEase · Shop with Ease</p>
+        </div>
+    </footer>
+
+<script>
+        const searchInput = document.getElementById('searchInput');
+        const categorySelect = document.getElementById('categorySelectc');
+        const grid = document.getElementById('productsGrid');
+        const empty = document.getElementById('listEmpty');
+
+        let allProducts = []; // will store the fetched products
+
+        // NAVBAR LOGIC
+        function updateNavBar() {
+            const navLinks = document.getElementById('authNavLinks');
+            const token = localStorage.getItem('authToken');
+
+            navLinks.innerHTML = '';
+
+            // Home Link (Always present)
+            const homeLi = document.createElement('li');
+            homeLi.innerHTML = '<a href="index.html">Home</a>';
+            navLinks.appendChild(homeLi);
+            
+            // Products Link (Always present)
+            const productsLi = document.createElement('li');
+            productsLi.innerHTML = '<a href="products.html">Products</a>';
+            navLinks.appendChild(productsLi);
+
+            const shippingLi = document.createElement('li');
+            shippingLi.innerHTML = '<a href="shippingfee.html">Shipping</a>';
+            navLinks.appendChild(shippingLi);
+
+            if (token) {
+                // User is logged in: Dashboard and Logout
+                const dashboardLi = document.createElement('li');
+                dashboardLi.innerHTML = '<a href="customer-dashboard.html">Profile</a>';
+                navLinks.appendChild(dashboardLi);
+
+                const logoutLi = document.createElement('li');
+                logoutLi.innerHTML = '<a href="#" id="logoutLink">Logout</a>';
+                navLinks.appendChild(logoutLi);
+
+                // Attach simple logout handler
+                document.getElementById('logoutLink')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('authToken');
+                    alert("Logged out successfully!");
+                    window.location.href = "index.html";
+                });
+
+            } else {
+                // User is NOT logged in: Login
+                const loginLi = document.createElement('li');
+                loginLi.innerHTML = '<a href="login.html">Login</a>';
+                navLinks.appendChild(loginLi);
+            }
+        }
+        
+        // CART & PRODUCT RENDERING LOGIC
+        async function handleAddToCart(productId) {
+            const authToken = localStorage.getItem('authToken');
+
+            // 1. Authentication Check
+            if (!authToken) {
+                alert("You must be logged in to add items to the cart.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        productId: productId,
+                        quantity: 1
+                    })
+                });
+
+                // 2. Token Validity Check
+                if (res.status === 401) {
+                    alert("Session expired. Please log in again.");
+                    localStorage.removeItem('authToken');
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                if (res.ok) {
+                    alert("Product added to cart!");
+                } else {
+                    const error = await res.json();
+                    alert(`Failed to add to cart: ${error.message || 'Server error'}`);
+                }
+            } catch (error) {
+                console.error('Network error adding to cart:', error);
+                alert('An unexpected error occurred.');
+            }
+        }
+
+        function renderProducts(list) {
+            grid.innerHTML = '';
+
+            if (!list.length) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            list.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.setAttribute('data-name', p.name.toLowerCase());
+                card.setAttribute('data-category', p.category?.toLowerCase() || '');
+
+                card.innerHTML = `
+                    <div class="thumb">
+                        <img src="${p.image || '/img/placeholder.png'}" alt="${p.name}">
+                    </div>
+                    <hr style="margin: 18px 0;">
+                    <div class="product-h3">
+                        <h3>${p.name}</h3>
+                    </div>
+                    <div class="product-price">
+                        <p>₱${p.price}</p>
+                    </div>
+                    <div class="product-actions">
+                       <a class="btn btn-ghost" href="product.html?id=${p._id}">View</a>
+                        <button class="btn primary add-to-cart" data-product-id="${p._id}">
+                            Add to Cart
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Attach event listeners to all "Add to Cart" buttons
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = e.currentTarget.dataset.productId;
+                    handleAddToCart(productId);
+                });
+            });
+        }
+
+        // FILTERING LOGIC
+        function filterProducts() {
+            const text = searchInput.value.toLowerCase();
+            const cat = categorySelect.value.toLowerCase();
+
+            const filtered = allProducts.filter(p => {
+                const matchText = p.name.toLowerCase().includes(text);
+                const matchCat = cat ? p.category?.toLowerCase() === cat : true;
+                return matchText && matchCat;
+            });
+
+            renderProducts(filtered);
+        }
+
+        // INITIALIZATION CALLS
+        updateNavBar();
+
+        // 2. Fetch and Render Products
+        fetch('/api/products')
+            .then(res => res.json())
+            .then(products => {
+                allProducts = products;
+                renderProducts(products);
+            })
+            .catch(err => console.error('Failed to load products:', err));
+        
+        // 3. Attach Filter Listeners
+        searchInput.addEventListener('keyup', filterProducts);
+        categorySelect.addEventListener('input', filterProducts);
+
+</script>
+</body>
+</html>

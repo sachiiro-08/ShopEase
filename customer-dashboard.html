@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopEase — My Account</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="css/customer.css">
+</head>
+<body>
+    <nav class="navbar">
+    <a class="logo" href="index.html">ShopEase</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="shippingfee.html">Shipping</a></li>
+      <li><a href="customer-dashboard.html">Profile</a></li>
+      <li><a href="index.html" id="logout-link">Logout</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <h1>My Dashboard</h1>
+    <p id="user-info"></p>
+  </header>
+ <main>
+        <div class="dashboard-grid">
+            
+            <!-- 1. My Orders Card -->
+            <div class="card">
+                <h3 class="text-xl font-semibold mb-3">My Orders</h3>
+                <div id="order-list">
+                    <p class="text-gray-500 italic">Loading recent orders...</p> 
+                </div>
+                <button id="view-orders-btn" class="mt-4 bg-gray-200 text-gray-800 hover:bg-gray-300 p-2 rounded">View All Orders</button>
+            </div>
+            
+            <!-- 2. My Cart Card -->
+            <div class="card flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">My Cart</h3>
+                    <div id="cart-items" class="mb-4">
+                        <p>Your cart is loading...</p> 
+                    </div>
+                    
+                    <h4 class="font-bold mt-4 mb-2">Delivery Address</h4>
+                    <div id="address-form" class="space-y-2 text-sm">
+                        <input type="text" id="streetAddress" placeholder="Street Address / Barangay" 
+                            class="w-full p-2 border border-gray-300 rounded" required>
+                        <input type="text" id="municipality" value="Daanbantayan" readonly 
+                            class="w-full p-2 border border-gray-300 rounded bg-gray-100 font-bold" required>
+                        <input type="text" id="province" value="Cebu" readonly 
+                            class="w-full p-2 border border-gray-300 rounded bg-gray-100" required>
+                        <p class="text-red-600 text-xs italic">
+                            Note: Delivery is limited to Daanbantayan, Cebu only. We only accept Cash On Delivery.
+                        </p>
+                    </div>
+                    </div>
+                <div id="cart-summary" class="cart-summary">
+                    Total: ₱0.00
+                </div>
+                <button id="checkout-btn" class="mt-4 bg-blue-600 text-white hover:bg-blue-700 p-3 rounded-lg font-bold">Proceed to Checkout</button>
+            </div>
+
+            <!-- 4. Recommended Products -->
+            <div class="cards card-feature col-span-2">
+                <hr style="height:2px;background-color:lightgray; margin-bottom: 1rem">
+                <h3 class="text-xl font-semibold mb-3">Recommended Products</h3>
+                <div id="featured-product-details" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Products will appear here -->
+                    <p class="text-gray-500 col-span-full">Loading recommendations...</p>
+                </div>
+                <a href="products.html" class="btn btn-primary text-center mt-3 inline-block">Browse All Products</a>
+                 <hr style="height:2px;background-color:lightgray; margin-top: 2rem">
+            </div>
+   
+            <!-- 5. Profile Settings Card -->
+            <div class="card card-settings">
+                <h3 class="text-xl font-semibold mb-3">Profile Settings</h3>
+                <p class="text-sm text-gray-600 mb-4">Update your personal information, address, and login preferences.</p>
+                <a href="#" id="open-profile-modal-btn" class="btn btn-ghost text-center">Edit Profile</a>
+            </div>
+            
+            <!-- 6. Summary Statistics -->
+            <div class="card card-stats">
+                <h3 class="text-xl font-semibold mb-3">Account Summary</h3>
+                <div class="space-y-2">
+                    <p class="text-gray-700">Total Orders: <span id="total-orders-stat" class="font-extrabold text-blue-600 text-2xl ml-2">5</span></p>
+                    <p class="text-gray-700">Total Spent: <span id="total-spent-stat" class="font-extrabold text-green-600 text-2xl ml-2">₱12,450</span></p>
+                </div>
+            </div>
+
+            <div id="profile-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
+                <div class="edit-profile bg-white p-6 shadow-xl w-full max-w-md">
+                    <h3 class="text-2xl font-bold mb-4">Edit Profile</h3>
+                    <form id="profile-form">
+                        
+                        <div class="mb-4">
+                            <label for="profile-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input type="text" id="profile-name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="profile-email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                            <input type="email" id="profile-email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" readonly disabled>
+                            <p class="text-xs text-gray-500 mt-1">Email cannot be changed here.</p>
+                        </div>
+
+                        <h4 class="font-semibold mt-6 mb-3">Shipping Address</h4>
+                        
+                        <div class="mb-4">
+                            <label for="profile-streetAddress" class="block text-sm font-medium text-gray-700">Street Address / Barangay</label>
+                            <input type="text" id="profile-streetAddress" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="profile-municipality" class="block text-sm font-medium text-gray-700">Municipality / City</label>
+                            <input type="text" id="profile-municipality" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="profile-province" class="block text-sm font-medium text-gray-700">Province</label>
+                            <input type="text" id="profile-province" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" id="close-profile-modal" class="btn btn-ghost">Cancel</button>
+                            <button type="submit" class="savechangesbtn">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+               <!-- 7. Feedback Card -->
+        <div class="card card-feedback col-span-full">
+            <h3 class="text-xl font-semibold mb-3">Submit Feedback</h3>
+            <form id="feedback-form" class="space-y-3">
+                <textarea id="feedback-message" rows="4" 
+                        placeholder="Write your feedback here..." 
+                        class="w-full p-2 border border-gray-300 rounded resize-none" required></textarea>
+                <button type="submit" 
+                        class="feedback-button">
+                    Submit Feedback
+                </button>
+                <p id="feedback-status" class="text-sm text-gray-600 mt-1"></p>
+            </form>
+        </div>
+        </div>
+
+    </main>
+
+<script src="js/main.js"></script>
+<script src="js/products.js"></script>
+
+<script>
+        const authToken = localStorage.getItem('authToken');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartSummaryElement = document.getElementById('cart-summary');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const profileModal = document.getElementById('profile-modal');
+        const profileForm = document.getElementById('profile-form');
+        const openProfileBtn = document.getElementById('open-profile-modal-btn');
+
+        // --- Utility Functions ---
+        const getAuthHeaders = (contentType = 'application/json') => ({
+            'Content-Type': contentType,
+            'Authorization': `Bearer ${authToken}`
+        });
+
+        const handleError = (message) => {
+            // Simple display of error messages
+            alert(message);
+        }
+
+        const updateQuantity = async (productId, newQuantity) => {
+            if (newQuantity < 1) return deleteItem(productId);
+            
+            const res = await fetch('/api/cart/update', {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ productId, quantity: newQuantity })
+            });
+
+            if (res.ok) {
+                // Optionally show a toast notification here
+                loadCart(); 
+            } else {
+                const data = await res.json();
+                handleError(data.message || 'Failed to update cart quantity.');
+            }
+        };
+
+        const deleteItem = async (productId) => {
+             if (!confirm('Are you sure you want to remove this item from your cart?')) {
+                return;
+            }
+            const res = await fetch(`/api/cart/delete/${productId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders(''), // No content type needed for DELETE body
+            });
+
+            if (res.ok) {
+                // Optionally show a toast notification here
+                loadCart(); 
+            } else {
+                const data = await res.json();
+                handleError(data.message || 'Failed to remove item from cart.');
+            }
+        };
+
+        const loadCart = async () => {
+            if (!authToken) {
+                cartItemsContainer.innerHTML = '<p class="text-red-500">Please log in to view your cart.</p>';
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/cart', { headers: getAuthHeaders('') });
+                
+                if (res.status === 401) throw new Error('Unauthorized');
+                if (!res.ok) throw new Error('Failed to fetch cart data.');
+                
+                const cart = await res.json();
+
+                // Clear container and calculate total
+                cartItemsContainer.innerHTML = '';
+                let total = 0;
+
+                if (!cart.items || cart.items.length === 0) {
+                    cartItemsContainer.innerHTML = '<p class="text-gray-500 italic">Your cart is empty. Go shopping!</p>';
+                    checkoutBtn.disabled = true;
+                    cartSummaryElement.textContent = 'Total: ₱0.00';
+                    return;
+                }
+
+                // Render each item
+                cart.items.forEach(item => {
+                    // FIX: CRITICAL check for null product data (deleted product)
+                    if (!item.product) {
+                        console.warn(`Cart item with ID ${item._id} skipped: Product was deleted.`);
+                        return; 
+                    }
+
+                    const product = item.product;
+                    const subtotal = product.price * item.quantity;
+                    total += subtotal;
+                    
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'cart-item';
+                    itemDiv.innerHTML = `
+                        <div class="cart-details">
+                            <img src="${product.image || 'https://placehold.co/50x50/333333/ffffff?text=No+Img'}" 
+                                 alt="${product.name}" class="cart-image" onerror="this.onerror=null;this.src='https://placehold.co/50x50/333333/ffffff?text=No+Img';">
+                            <div>
+                                <h4 class="font-medium text-sm m-0">${product.name}</h4>
+                                <p class="text-xs text-gray-500 m-0">₱${product.price.toFixed(2)} ea</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <div class="quantity-controls">
+                                <button data-product-id="${product._id}" data-action="decrement">-</button>
+                                <input type="number" value="${item.quantity}" min="1" readonly>
+                                <button data-product-id="${product._id}" data-action="increment">+</button>
+                            </div>
+                            <span class="w-16 text-right font-bold text-sm">₱${subtotal.toFixed(2)}</span>
+                            <button class="delete-btn ml-3" data-product-id="${product._id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(itemDiv);
+                });
+
+                // Update summary and buttons
+                cartSummaryElement.textContent = `Total: ₱${total.toFixed(2)}`;
+                checkoutBtn.disabled = false;
+                
+                // Attach Event Listeners to the newly created elements
+                cartItemsContainer.querySelectorAll('button[data-action]').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const productId = e.target.dataset.productId;
+                        const action = e.target.dataset.action;
+                        const input = e.target.parentNode.querySelector('input');
+                        let currentQuantity = parseInt(input.value);
+
+                        if (action === 'increment') {
+                            updateQuantity(productId, currentQuantity + 1);
+                        } else if (action === 'decrement' && currentQuantity > 1) {
+                            updateQuantity(productId, currentQuantity - 1);
+                        } else if (action === 'decrement' && currentQuantity === 1) {
+                             deleteItem(productId); // Delete if decrementing from 1
+                        }
+                    });
+                });
+
+                cartItemsContainer.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        deleteItem(e.currentTarget.dataset.productId);
+                    });
+                });
+
+            } catch (error) {
+                console.error('Cart Loading Error:', error);
+                if (error.message === 'Unauthorized') {
+                    alert("Session expired. Please log in again.");
+                    localStorage.removeItem('authToken');
+                    window.location.href = "login.html";
+                } else {
+                    cartItemsContainer.innerHTML = `<p class="text-red-500">Error loading cart: ${error.message}</p>`;
+                    checkoutBtn.disabled = true;
+                }
+            }
+        };
+
+        // --- Authentication and Initialization ---
+        const loadUserInfo = async () => {
+            // Your existing user info loading logic (fixed in previous steps)
+            fetch('/api/user', { headers: getAuthHeaders() })
+                .then(res => {
+                    if (res.status === 401) throw new Error('Unauthorized');
+                    return res.json();
+                })
+                .then(user => {
+                    // Uses 'name' property returned by the server, which is mapped from 'username'
+                    document.getElementById('user-info').textContent = `Logged in as: ${user.name} (${user.email})`;
+                })
+                .catch(error => {
+                    console.error('User Info Error:', error);
+                    if (error.message === 'Unauthorized') {
+                        // Let loadCart handle the redirection if no auth token is found
+                    } else {
+                        document.getElementById('user-info').textContent = `User Info Error: ${error.message}`;
+                    }
+                });
+        };
+
+        const handleCheckout = async () => {
+            if (!authToken) {
+                alert("You must be logged in to complete checkout.");
+                window.location.href = "login.html";
+                return;
+            }
+            
+            // Check if cart is empty before sending request
+            if (cartSummaryElement.textContent.includes('₱0.00')) {
+                alert("Your cart is empty!");
+                return;
+            }
+
+            // COLLECT ADDRESS DATA
+            const streetAddress = document.getElementById('streetAddress').value;
+            const municipality = document.getElementById('municipality').value;
+            const province = document.getElementById('province').value;
+
+            // Simple validation check
+            if (!streetAddress) {
+                alert("Please enter your Street Address or Barangay for delivery.");
+                return;
+            }
+
+            const orderData = {
+                streetAddress: streetAddress,
+                municipality: municipality,
+                province: province
+            };
+
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(orderData) 
+             });
+            
+            if (res.status === 401) {
+                alert("Your session has expired. Please log in again.");
+                localStorage.removeItem('authToken');
+                window.location.href = "login.html";
+                return; 
+            }
+
+            if (res.status === 403) {
+                const data = await res.json();
+                alert(data.message); // Should alert the "Delivery is restricted to Daanbantayan" message
+                return;
+            }
+
+            if (res.ok) {
+                const data = await res.json();
+                alert(data.message || 'Order placed successfully!');
+                loadCart(); // Reload the cart, which should now be empty
+            } else {
+                const errorText = await res.text();
+                try {
+                    const data = JSON.parse(errorText);
+                    alert(data.message || 'Error placing order.');
+                } catch (e) {
+                     alert('An unexpected server error occurred during checkout.');
+                     console.error('Server error response:', errorText);
+                }
+            }
+        };
+
+        const fetchAndRenderOrders = async (isRecent = true) => {
+            const orderListContainer = document.getElementById('order-list');
+            
+            // Clear previous content
+            orderListContainer.innerHTML = isRecent ? '<p>Loading recent orders...</p>' : '<p>Loading all orders...</p>';
+
+            try {
+                const res = await fetch('/api/orders', { headers: getAuthHeaders() });
+                
+                if (!res.ok) {
+                    if (res.status === 401) throw new Error('Unauthorized. Please log in again.');
+                    throw new Error('Failed to load your orders.');
+                }
+
+                const orders = await res.json();
+                let ordersToDisplay = orders;
+
+                if (isRecent) {
+                    ordersToDisplay = orders.slice(0, 3); 
+                }
+
+                if (!ordersToDisplay.length) {
+                    orderListContainer.innerHTML = '<p class="text-gray-500 italic">You don\'t have any orders yet.</p>';
+                    if (!isRecent) alert("You don't have any past orders yet.");
+                    return;
+                }
+                
+                // NEW SAFE RENDERING LOGIC: Build a DocumentFragment and append elements
+                orderListContainer.innerHTML = ''; // Clear container before re-populating
+                const fragment = document.createDocumentFragment();
+
+                ordersToDisplay.forEach(order => {
+                    const orderItemDiv = document.createElement('div');
+                    orderItemDiv.className = 'order-item border-b border-gray-300 py-2';
+
+                    // Use textContent for the product list (THE FIX)
+                    const productNames = order.products.map(p => p.name).join(', ');
+                    const productsP = document.createElement('p');
+                    productsP.className = 'text-xs text-gray-500';
+                    productsP.innerHTML = '<strong>Products:</strong> '; // Inject innerHTML safely for the strong tag
+                    productsP.append(document.createTextNode(productNames)); // Append the text content safely
+                    
+                    orderItemDiv.innerHTML = `
+                        <p><strong>Order ID:</strong> ${order._id.substring(0, 8)}...</p>
+                        <p><strong>Status:</strong> <span class="font-semibold text-sm ${order.status === 'Delivered' ? 'text-green-600' : 'text-yellow-600'}">${order.status}</span></p>
+                        <p><strong>Total:</strong> <span style="color:red">₱${order.totalPrice.toFixed(2)}</span></p>
+                    `;
+                    
+                    orderItemDiv.appendChild(productsP); // Append the safe element
+                    fragment.appendChild(orderItemDiv);
+                });
+
+                orderListContainer.appendChild(fragment);
+
+                // Hide the 'View All Orders' button if we loaded all orders (i.e., not just recent)
+                const viewBtn = document.getElementById('view-orders-btn');
+                if (viewBtn) {
+                    viewBtn.style.display = (isRecent && orders.length > 3) ? 'block' : 'none';
+                }
+
+            } catch (err) {
+                console.error('Order Loading Error:', err.message);
+                orderListContainer.innerHTML = `<p class="text-red-500">Error: ${err.message}</p>`;
+                if (err.message.includes('Unauthorized')) {
+                    localStorage.removeItem('authToken');
+                    window.location.href = "login.html";
+                }
+            }
+        };
+        
+        const loadRecentOrders = () => fetchAndRenderOrders(true);
+
+        document.getElementById('logout-link').addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        try {
+            const res = await fetch('/api/logout', { method: 'POST' }); 
+
+            if (res.ok) {
+                // Clear the JWT upon successful logout
+                localStorage.removeItem('authToken'); 
+                alert("Logout successful!");
+                window.location.href = "index.html"; 
+            } else {
+                alert("Logout failed. Please try again.");
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            alert("An error occurred during logout.");
+        }
+    });
+        
+        checkoutBtn.addEventListener('click', handleCheckout);
+
+        document.addEventListener('DOMContentLoaded', () => {
+        if (authToken) {
+            loadUserInfo();
+            loadCart();
+            loadFeaturedProducts();
+            loadAccountSummary();
+            loadRecentOrders();
+        } else {
+            alert("You must log in to view the dashboard.");
+            window.location.href = "login.html";
+        }
+        });
+
+        document.getElementById('view-orders-btn').addEventListener('click', async () => {
+
+        fetchAndRenderOrders(false);
+        });
+
+        const loadAccountSummary = async () => {
+        try {
+            const res = await fetch('/api/user/stats', { headers: getAuthHeaders() });
+            if (!res.ok) throw new Error('Failed to fetch account stats.');
+
+            const stats = await res.json();
+            document.getElementById('total-orders-stat').textContent = stats.totalOrders;
+            document.getElementById('total-spent-stat').textContent = `₱${stats.totalSpent.toFixed(2)}`;
+        } catch (err) {
+            console.warn(err.message);
+        }
+        };
+
+        const addToCart = async (productId) => {
+        if (!authToken) {
+            alert("You must log in to add items to your cart.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/cart/add', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ productId, quantity: 1 })
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message || 'Failed to add product to cart.');
+            }
+
+            alert('Product added to your cart!');
+            loadCart(); // Update the cart display
+        } catch (err) {
+            console.error(err);
+            alert(err.message);
+        }
+    };
+
+        const truncateDescription = (text, maxLength = 60) => {
+            if (!text) return '';
+            if (text.length > maxLength) {
+                return text.substring(0, maxLength) + '...';
+            }
+            return text;
+        };
+
+        const loadFeaturedProducts = async () => {
+        const container = document.getElementById('featured-product-details');
+
+        try {
+            // Try fetching products from your API
+            const res = await fetch('/api/products');
+            let products = [];
+            if (res.ok) {
+                products = await res.json();
+            }
+
+            // Fallback: If API fails or returns empty, use hardcoded products
+            if (!products || !products.length) {
+                products = [
+                    { _id: '1', name: 'Leather Journal', price: 750, category: 'Stationery', image: 'https://placehold.co/100x100' },
+                    { _id: '2', name: 'Premium Pen', price: 250, category: 'Stationery', image: 'https://placehold.co/100x100' },
+                    { _id: '3', name: 'Notebook Set', price: 450, category: 'Stationery', image: 'https://placehold.co/100x100' },
+                    { _id: '4', name: 'Desk Organizer', price: 600, category: 'Stationery', image: 'https://placehold.co/100x100' }
+                ];
+            }
+
+            // Pick first 3–4 products
+            const featured = products.slice(0, 9);
+
+            // Render
+            container.innerHTML = featured.map(p => `
+                <div class="fp flex items-center p-3 mb-2">
+                    <img src="${p.image || '/img/placeholder.png'}" alt="${p.name}" class="cart-image !w-24 !h-24 mr-4 rounded-lg">
+                    <div class="customerreco">
+                        <h4 class="text-lg font-semibold">${p.name}</h4>
+                        <p class="text-sm text-gray-500">${p.category || 'No category'}</p>
+                        <p class="text-sm text-gray-600 italic m-0">
+                            ${truncateDescription(p.description)}
+                        </p>
+                        <p class="text-lg text-red-600 font-bold">₱${p.price}</p>
+                        <a class="btnn" href="product.html?id=${p._id}">View</a>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (err) {
+            console.error('Failed to load featured products:', err);
+            container.innerHTML = '<p class="text-red-500">Failed to load recommendations.</p>';
+        }
+    };
+
+        // Load data into the modal inputs
+        const loadProfileData = async () => {
+            try {
+                const res = await fetch('/api/user', { headers: getAuthHeaders() });
+                if (!res.ok) throw new Error('Failed to fetch user data.');
+
+                const user = await res.json();
+                
+                // Populate Personal Info
+                document.getElementById('profile-name').value = user.name || '';
+                document.getElementById('profile-email').value = user.email || '';
+                
+                // Populate Address Info
+                const address = user.address || {};
+                document.getElementById('profile-streetAddress').value = address.streetAddress || '';
+                document.getElementById('profile-municipality').value = address.municipality || 'Daanbantayan'; // Default for ShopEase
+                document.getElementById('profile-province').value = address.province || 'Cebu'; // Default for ShopEase
+
+            } catch (error) {
+                console.error('Error loading profile data:', error);
+                alert('Could not load profile data for editing.');
+            }
+        };
+
+        // Open the modal and load data
+        openProfileBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadProfileData(); 
+            profileModal.classList.remove('hidden');
+        });
+
+        // Close the modal via 'Cancel' button or background click
+        document.getElementById('close-profile-modal').addEventListener('click', () => {
+            profileModal.classList.add('hidden');
+        });
+        
+        profileModal.addEventListener('click', (e) => {
+            if (e.target === profileModal) {
+                profileModal.classList.add('hidden');
+            }
+        });
+
+        // Handle Form Submission (Save Changes)
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const updatedData = {
+                name: document.getElementById('profile-name').value,
+                address: {
+                    streetAddress: document.getElementById('profile-streetAddress').value,
+                    municipality: document.getElementById('profile-municipality').value,
+                    province: document.getElementById('profile-province').value,
+                }
+            };
+
+            try {
+                const res = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (res.ok) {
+                    alert('Profile updated successfully!');
+                    profileModal.classList.add('hidden');
+                    loadUserInfo(); // Reload user info in the main header
+                } else {
+                    const data = await res.json();
+                    alert(data.message || 'Failed to save changes.');
+                }
+
+            } catch (error) {
+                console.error('Profile update error:', error);
+                alert('An error occurred during profile update.');
+            }
+        });
+
+</script>
+
+<script>
+const feedbackForm = document.getElementById('feedback-form');
+
+feedbackForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const message = document.getElementById('feedback-message').value.trim();
+    if (!message) {
+        alert('Please enter your feedback.');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify({ message })
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.message || 'Failed to submit feedback');
+        }
+
+        alert('Feedback submitted successfully!');
+        feedbackForm.reset();
+
+    } catch (err) {
+        console.error('Feedback submission error:', err);
+        alert('An error occurred. Please try again.');
+    }
+});
+
+</script>
+</body>
+</html>

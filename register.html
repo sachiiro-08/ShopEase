@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/css/register.css">
+  <title>ShopEase — Register</title>
+</head>
+<body>
+
+  <nav class="navbar">
+  <a class="logo" href="index.html">ShopEase</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="login.html">Login</a></li>
+    <li><a class="active" href="register.html">Register</a></li>
+  </ul>
+</nav>
+  <div class="register-container">
+    <h2>Create Account</h2>
+    <p id="regError" style="color:red;"></p>
+      <form id="registerForm" action="/register" method="POST">
+        <div class="input-group">
+          <input type="text" id="username-reg" name="username" placeholder="Enter username" autocomplete="off"
+        required />
+        </div>
+        <div class="input-group">
+          <input type="email" id="email-reg" name="email" placeholder="Enter email" autocomplete="off"
+        required />
+        </div>
+        <div class="input-group">
+          <input type="password" id="password-reg" name="password" placeholder="Enter password" autocomplete="new-password"
+        required />
+        </div>
+        <button type="submit" class="btn-primary">Register</button>
+        <p class="switch-auth">Already have an account? <a class="login-link" href="login.html">Login</a></p>
+      </form>
+  </div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const data = Object.fromEntries(formData);
+
+  const res = await fetch('/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  const text = await res.text();
+
+  if (text === "REGISTER_SUCCESS") {
+    alert("Registration successful!");
+    window.location.href = "/login"; // go to login page
+  } else {
+    document.getElementById('regError').textContent = text;
+  }
+});
+</script>
+</body>
+</html>
+

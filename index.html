@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ShopEase — Home</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="index.html">ShopEase</a>
+        <ul class="nav-links" id="authNavLinks">
+        </ul>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container hero-inner">
+                <div class="hero-copy">
+                    <h1>Shop with ease & happiness</h1>
+                    <p class="muted">Discover amazing products at unbeatable prices. Start shopping now!</p>
+                    <p class="muted">We only accept Cash On Delivery</p>
+                    <p>Exclusive in Daanbantayan, Cebu</p>
+                    <a class="btn primary" href="products.html">Shop Now</a>
+                </div>
+                <div class="hero-image">
+                    <img src="/img/indexbg.webp" alt="ShopEase hero image" />
+                </div>
+            </div>
+        </section>
+
+        <section class="container featured">
+            <div class="section-head">
+                <h2>Featured products</h2>
+                <a class="view-all" href="products.html">View all</a>
+            </div>
+
+            <div id="featuredGrid" class="grid grid-3"></div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2025 ShopEase · Shop with Ease</p>
+        </div>
+    </footer>
+
+<script src="js/main.js"></script>
+<script src="js/products.js"></script>
+<!--<script>
+        // SECURE ADD TO CART LOGIC (MISSING: Must be defined here)
+        async function handleAddToCart(productId) {
+            const authToken = localStorage.getItem('authToken');          
+            if (!authToken) {
+                alert("You must be logged in to add items to the cart.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        productId: productId,
+                        quantity: 1
+                    })
+                });
+
+                if (res.status === 401) {
+                     alert("Session expired. Please log in again.");
+                     localStorage.removeItem('authToken');
+                     window.location.href = "login.html";
+                     return;
+                }
+                if (res.ok) {
+                    alert("Product added to cart!");
+                } else {
+                    const error = await res.json();
+                    alert(`Failed to add to cart: ${error.message || 'Server error'}`);
+                }
+            } catch (error) {
+                console.error('Network error adding to cart:', error);
+                alert('An unexpected network error occurred.');
+            }
+        }
+        
+        // NAVBAR LOGIC (Fixes login/logout display)
+        function updateNavBar() {
+            const navLinks = document.getElementById('authNavLinks');
+
+            navLinks.innerHTML = '';           
+
+            const homeLi = document.createElement('li');
+            homeLi.innerHTML = '<a href="index.html">Home</a>';
+            navLinks.appendChild(homeLi);          
+
+            const productsLi = document.createElement('li');
+            productsLi.innerHTML = '<a href="products.html">Products</a>';
+            navLinks.appendChild(productsLi);
+
+            const shippingLi = document.createElement('li');
+            shippingLi.innerHTML = '<a href="shippingfee.html">Shipping</a>';
+            navLinks.appendChild(shippingLi);
+
+            const token = localStorage.getItem('authToken');
+            if (token) {
+
+                const dashboardLi = document.createElement('li');
+                dashboardLi.innerHTML = '<a href="customer-dashboard.html">Profile</a>';
+                navLinks.appendChild(dashboardLi);
+
+                const logoutLi = document.createElement('li');
+                logoutLi.innerHTML = '<a href="#" id="logoutLink">Logout</a>';
+                navLinks.appendChild(logoutLi);
+                document.getElementById('logoutLink')?.addEventListener('click', (e) => {
+                     e.preventDefault();
+                     localStorage.removeItem('authToken');
+                     alert("Logged out successfully!");
+                     window.location.href = "index.html";
+                });
+            } else {
+                const loginLi = document.createElement('li');
+                loginLi.innerHTML = '<a href="login.html">Login</a>';
+                navLinks.appendChild(loginLi);
+            }
+        }
+
+        function attachAddToCartListeners() {
+            document.querySelectorAll('#featuredGrid .add-to-cart').forEach(button => {
+                if (button.hasAttribute('data-listener-set')) return;
+                button.addEventListener('click', (e) => {
+                    const productId = e.currentTarget.dataset.productId;
+                    handleAddToCart(productId);
+                });
+                button.setAttribute('data-listener-set', 'true');
+            });
+        }
+        updateNavBar();
+
+        loadFeatured('#featuredGrid', 4);
+
+        setTimeout(attachAddToCartListeners, 300);
+</script>-->
+
+<script>
+    // SECURE ADD TO CART LOGIC
+    async function handleAddToCart(productId) {
+        const authToken = localStorage.getItem('authToken');
+        if (!authToken) {
+            alert("You must be logged in to add items to the cart.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ productId, quantity: 1 })
+            });
+
+            if (res.status === 401) {
+                alert("Session expired. Please log in again.");
+                localStorage.removeItem('authToken');
+                window.location.href = "login.html";
+                return;
+            }
+
+            if (res.ok) {
+                alert("Product added to cart!");
+            } else {
+                const error = await res.json();
+                alert(`Failed to add to cart: ${error.message || 'Server error'}`);
+            }
+        } catch (error) {
+            console.error('Network error adding to cart:', error);
+            alert('An unexpected network error occurred.');
+        }
+    }
+
+    
+        function updateNavBar() {
+            const navLinks = document.getElementById('authNavLinks');
+            const token = localStorage.getItem('authToken');
+
+            navLinks.innerHTML = '';
+
+            // Home Link (Always present)
+            const homeLi = document.createElement('li');
+            homeLi.innerHTML = '<a href="index.html">Home</a>';
+            navLinks.appendChild(homeLi);
+            
+            // Products Link (Always present)
+            const productsLi = document.createElement('li');
+            productsLi.innerHTML = '<a href="products.html">Products</a>';
+            navLinks.appendChild(productsLi);
+
+            const shippingLi = document.createElement('li');
+            shippingLi.innerHTML = '<a href="shippingfee.html">Shipping</a>';
+            navLinks.appendChild(shippingLi);
+
+            if (token) {
+                // User is logged in: Dashboard and Logout
+                const dashboardLi = document.createElement('li');
+                dashboardLi.innerHTML = '<a href="customer-dashboard.html">Profile</a>';
+                navLinks.appendChild(dashboardLi);
+
+                const logoutLi = document.createElement('li');
+                logoutLi.innerHTML = '<a href="#" id="logoutLink">Logout</a>';
+                navLinks.appendChild(logoutLi);
+
+                // Attach simple logout handler
+               // Locate this block inside updateNavBar()
+                document.getElementById('logoutLink')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('authToken');
+                    
+                    alert("Logged out successfully!");
+                    window.location.href = "index.html";
+                });
+
+            } else {
+                // User is NOT logged in: Login
+                const loginLi = document.createElement('li');
+                loginLi.innerHTML = '<a href="login.html">Login</a>';
+                navLinks.appendChild(loginLi);
+            }
+        }
+    
+    function attachAddToCartListeners() {
+        document.querySelectorAll('#featuredGrid .add-to-cart').forEach(button => {
+            if (button.hasAttribute('data-listener-set')) return;
+            button.addEventListener('click', (e) => {
+                handleAddToCart(e.currentTarget.dataset.productId);
+            });
+            button.setAttribute('data-listener-set', 'true');
+        });
+    }
+
+    // Initialize page
+    updateNavBar();
+    loadFeatured('#featuredGrid', 4);
+    setTimeout(attachAddToCartListeners, 300);
+</script>
+
+
+
+
+</body>
+</html>

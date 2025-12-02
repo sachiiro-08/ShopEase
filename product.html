@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ShopEase — Product</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="logo" href="index.html">ShopEase</a>
+  <ul class="nav-links"id="authNavLinks">
+  </ul>
+</nav>
+
+  <main class="container product-page">
+    <a class="back" href="products.html">← Back to products</a>
+
+    <div id="productDetail" class="product-detail">
+      <!-- content injected by JS -->
+    </div>
+  </main>
+
+  <footer class="site-footer">
+        <div class="container">
+            <p>© 2025 ShopEase · Shop with Ease</p>
+        </div>
+    </footer>
+
+<script>
+      // NAVBAR LOGIC: Checks localStorage for token and updates links
+      function updateNavBar() {
+                  const navLinks = document.getElementById('authNavLinks');
+                  const token = localStorage.getItem('authToken');
+
+                  navLinks.innerHTML = '';
+
+                  // Home Link (Always present)
+                  const homeLi = document.createElement('li');
+                  homeLi.innerHTML = '<a href="index.html">Home</a>';
+                  navLinks.appendChild(homeLi);
+                  
+                  // Products Link (Always present)
+                  const productsLi = document.createElement('li');
+                  productsLi.innerHTML = '<a href="products.html">Products</a>';
+                  navLinks.appendChild(productsLi);
+
+                  const shippingLi = document.createElement('li');
+                  shippingLi.innerHTML = '<a href="shippingfee.html">Shipping</a>';
+                  navLinks.appendChild(shippingLi);
+
+                  if (token) {
+                      // User is logged in: Dashboard and Logout
+                      const dashboardLi = document.createElement('li');
+                      dashboardLi.innerHTML = '<a href="customer-dashboard.html">Profile</a>';
+                      navLinks.appendChild(dashboardLi);
+
+                      const logoutLi = document.createElement('li');
+                      logoutLi.innerHTML = '<a href="#" id="logoutLink">Logout</a>';
+                      navLinks.appendChild(logoutLi);
+
+                      // Attach simple logout handler
+                      document.getElementById('logoutLink')?.addEventListener('click', (e) => {
+                          e.preventDefault();
+                          localStorage.removeItem('authToken');
+                          alert("Logged out successfully!");
+                          window.location.href = "index.html";
+                      });
+
+                  } else {
+                      // User is NOT logged in: Login
+                      const loginLi = document.createElement('li');
+                      loginLi.innerHTML = '<a href="login.html">Login</a>';
+                      navLinks.appendChild(loginLi);
+                  }
+              }
+              
+      updateNavBar();
+</script>
+<script src="js/main.js"></script>
+<script src="js/product.js"></script>
+<script>
+    initProductPage();
+</script>
+
+</body>
+</html>

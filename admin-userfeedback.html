@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - User Feedback | ShopEase</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <header class="admin-header">
+        <div class="brand">ShopEase Admin</div>
+        <nav class="admin-nav">
+            <a href="admin-dashboard.html">Dashboard</a>
+            <a href="admin-products.html">Products</a>
+            <a href="admin-orders.html">Orders</a>
+            <a href="admin-users.html">Users</a>
+            <a href="admin-userfeedback.html" class="active">User Feedback</a>
+            <a href="../login.html">Logout</a>
+        </nav>
+    </header>
+
+    <main class="admin-feedback container">
+        <h1 id="user-feedback">User Feedback</h1>
+        <div id="feedback-list" class="grid grid-3">
+            <p>Loading feedbacks...</p>
+        </div> 
+    </main>
+
+<script>
+// --- Helper to get the JWT from localStorage ---
+function getAuthToken() {
+    return localStorage.getItem('authToken');
+}
+
+// --- Load feedbacks for admin ---
+async function loadFeedbacks() {
+    const container = document.getElementById('feedback-list');
+    container.innerHTML = '<p>Loading feedbacks...</p>';
+
+    const token = getAuthToken();
+    if (!token) {
+        container.innerHTML = '<p class="text-red-500">Admin token missing. Please log in.</p>';
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/admin/feedback', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+            container.innerHTML = '<p class="text-red-500">Access Denied. Please log in as an Admin.</p>';
+            return;
+        }
+
+        const feedbacks = await res.json();
+
+        if (!feedbacks.length) {
+            container.innerHTML = '<p>No feedbacks yet.</p>';
+            return;
+        }
+
+        container.innerHTML = feedbacks.map(f => `
+            <div class="card">
+                <p><strong>${f.userId.username || f.userId.email}</strong></p>
+                <p>${f.message}</p>
+                <p class="text-xs text-gray-500">${new Date(f.createdAt).toLocaleString()}</p>
+            </div>
+        `).join('');
+
+    } catch (err) {
+        console.error('Error loading feedbacks:', err);
+        container.innerHTML = '<p class="text-red-500">Error loading feedbacks.</p>';
+    }
+}
+
+// --- Initialize on page load ---
+document.addEventListener('DOMContentLoaded', loadFeedbacks);
+</script>
+
+</body>
+</html>

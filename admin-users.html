@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin-Users - ShopEase</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <header class="admin-header">
+        <div class="brand">ShopEase Admin</div>
+        <nav class="admin-nav">
+            <a href="admin-dashboard.html">Dashboard</a>
+            <a href="admin-products.html">Products</a>
+            <a href="admin-orders.html">Orders</a>
+            <a href="admin-users.html" class="active">Users</a>
+            <a href="admin-userfeedback.html">User Feedback</a>
+            <a href="../login.html">Logout</a>
+        </nav>
+    </header>
+
+    <main class="admin-users container">
+        <h1>Manage Users</h1>
+
+        <!-- Users Grid -->
+        <div id="user-list" class="grid grid-3"></div>
+    </main>
+
+<script>
+        function getToken() {
+            return localStorage.getItem('authToken');
+        }
+
+        function getAuthHeaders(contentType = 'application/json') {
+            const token = getToken();
+            if (!token) {
+                console.error('Authentication token not found. Redirecting to login.');
+                return {};
+            }
+            return {
+                'Content-Type': contentType,
+                'Authorization': `Bearer ${token}`
+            };
+        }
+        // --- END AUTH HELPERS ---
+        
+        async function loadUsers() {
+            const headers = getAuthHeaders('application/json');
+            
+            // If no token exists, headers.Authorization will be undefined, so we stop.
+            if (!headers.Authorization) return;
+
+            try {
+                const res = await fetch('/admin/api/users', { headers }); 
+                
+                if (res.status === 401 || res.status === 403) {
+                    console.error("Authorization failed. Please ensure you are logged in as an Admin.");
+                    document.getElementById('user-list').innerHTML = `<p class="error-message">Access Denied. Please log in as an Admin.</p>`;
+                    return;
+                }
+                
+                const users = await res.json();
+                const container = document.getElementById('user-list');
+                container.innerHTML = '';
+
+                // Handle server errors that return a JSON error object (like a 500)
+                if (res.status !== 200) {
+                     container.innerHTML = `<p class="error-message">Error fetching users: ${users.message || 'Server error'}</p>`;
+                     return;
+                }
+
+                users.forEach(user => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${user.username}</h3>
+                        <div class="user-email"><p><strong>Email:<br></strong> ${user.email}</p></div>
+                        <p><strong>Role:</strong>
+                            <select onchange="updateRole('${user._id}', this.value)">
+                                <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Customer</option>
+                                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                            </select>
+                        </p>
+                        <button class="btn delete" onclick="deleteUser('${user._id}')">Delete User</button>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Network or parsing error:", error);
+                document.getElementById('user-list').innerHTML = `<p class="error-message">Network error. Check server status.</p>`;
+            }
+        }
+
+        async function updateRole(id, role) {
+            const headers = getAuthHeaders('application/json');
+            if (!headers.Authorization) return;
+
+            try {
+                const res = await fetch(`/admin/api/users/${id}`, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify({ role })
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    console.error("Authorization failed on PUT request.");
+                    return;
+                }
+                
+                if (res.status !== 200) {
+                    const errorData = await res.json();
+                    console.error("Update failed:", errorData.message);
+                }
+
+            } catch (error) {
+                console.error("Error during role update:", error);
+            }
+            loadUsers();
+        }
+
+        async function deleteUser(id) {
+            // NOTE: Replaced forbidden window.confirm() with a console log and direct delete.
+            console.log("Simulating user confirmation for delete. Proceeding..."); 
+            
+            const headers = getAuthHeaders();
+            if (!headers.Authorization) return;
+
+            try {
+          
+                const res = await fetch(`/admin/api/users/${id}`, { method: 'DELETE', headers }); 
+                
+                if (res.status === 401 || res.status === 403) {
+                    console.error("Authorization failed on DELETE request.");
+                    return;
+                }
+                
+                if (res.status !== 200) {
+                    const errorData = await res.json();
+                    console.error("Delete failed:", errorData.message);
+                }
+
+            } catch (error) {
+                console.error("Error during user deletion:", error);
+            }
+            loadUsers();
+        }
+
+        loadUsers();
+</script>
+
+</body>
+</html>

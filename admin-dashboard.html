@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopEase Admin Dashboard</title>
+  <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body>
+<header class="admin-header">
+    <div class="brand">ShopEase Admin</div>
+    <nav class="admin-nav">
+        <a href="admin-dashboard.html" class="active">Dashboard</a>
+        <a href="admin-products.html">Products</a>
+        <a href="admin-orders.html">Orders</a>
+        <a href="admin-users.html">Users</a>
+        <a href="admin-userfeedback.html">User Feedback</a>
+        <a href="../login.html">Logout</a>
+    </nav>
+</header>
+
+<main class="dashboard-main">
+    <h1>Welcome, Alexa!</h1>
+    
+    <div class="dashboard-cards">
+        
+        <!-- PRODUCTS CARD -->
+        <a href="admin-products.html" class="card-link">
+            <div class="card" id="products-card">
+                <h2>Total Products</h2>
+                <p id="total-products">...</p>
+            </div>
+        </a>
+
+        <!-- ORDERS CARD -->
+        <a href="admin-orders.html" class="card-link">
+            <div class="card" id="orders-card">
+                <h2>Total Orders</h2>
+                <p id="total-orders">...</p>
+            </div>
+        </a>
+
+        <!-- USERS CARD -->
+        <a href="admin-users.html" class="card-link">
+            <div class="card" id="users-card">
+                <h2>Total Users</h2>
+          
+                <p id="total-users">...</p>
+            </div>
+        </a>
+
+    </div>
+</main>
+
+<script>
+    async function loadDashboardData() {
+        try {
+            const token = localStorage.getItem('authToken');
+            
+            const res = await fetch('/api/dashboard/stats', {
+                headers: {
+                    Authorization: `Bearer ${token}`, 
+                },
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({})); 
+                throw new Error(errorData.message || 'Failed to fetch dashboard data. Status: ' + res.status);
+            }
+
+            const data = await res.json();
+            
+            document.getElementById('total-products').innerText = data.totalProducts;
+            document.getElementById('total-orders').innerText = data.totalOrders;
+            document.getElementById('total-users').innerText = data.totalUsers;
+
+        } catch (err) {
+            console.error('Error loading dashboard data:', err);
+            // Fallback for visual confirmation if the API fails
+            document.getElementById('total-products').innerText = 'API Error';
+            document.getElementById('total-orders').innerText = 'API Error';
+            document.getElementById('total-users').innerText = 'API Error';
+        }
+    }
+
+    loadDashboardData();
+</script>
+</body>
+</html>
