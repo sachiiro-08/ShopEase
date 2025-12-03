@@ -48,96 +48,87 @@
 
         let allProducts = []; // will store the fetched products
 
-        // NAVBAR LOGIC
         function updateNavBar() {
             const navLinks = document.getElementById('authNavLinks');
             const token = localStorage.getItem('authToken');
+            const role = localStorage.getItem('authRole'); // NEW
 
             navLinks.innerHTML = '';
 
-            // Home Link (Always present)
-            const homeLi = document.createElement('li');
-            homeLi.innerHTML = '<a href="index.html">Home</a>';
-            navLinks.appendChild(homeLi);
-            
-            // Products Link (Always present)
-            const productsLi = document.createElement('li');
-            productsLi.innerHTML = '<a href="products.html">Products</a>';
-            navLinks.appendChild(productsLi);
+            // ALWAYS SHOW THESE
+            navLinks.innerHTML += `<li><a href="index.html">Home</a></li>`;
+            navLinks.innerHTML += `<li><a href="products.html">Products</a></li>`;
+            navLinks.innerHTML += `<li><a href="shippingfee.html">Shipping</a></li>`;
 
-            const shippingLi = document.createElement('li');
-            shippingLi.innerHTML = '<a href="shippingfee.html">Shipping</a>';
-            navLinks.appendChild(shippingLi);
+            // IF LOGGED IN AS CUSTOMER
+            if (token && role === "customer") {
+                navLinks.innerHTML += `<li><a href="customer-dashboard.html">Profile</a></li>`;
+                navLinks.innerHTML += `<li><a href="#" id="logoutLink">Logout</a></li>`;
 
-            if (token) {
-                // User is logged in: Dashboard and Logout
-                const dashboardLi = document.createElement('li');
-                dashboardLi.innerHTML = '<a href="customer-dashboard.html">Profile</a>';
-                navLinks.appendChild(dashboardLi);
-
-                const logoutLi = document.createElement('li');
-                logoutLi.innerHTML = '<a href="#" id="logoutLink">Logout</a>';
-                navLinks.appendChild(logoutLi);
-
-                // Attach simple logout handler
-                document.getElementById('logoutLink')?.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    localStorage.removeItem('authToken');
+                document.getElementById('logoutLink').onclick = () => {
+                    localStorage.removeItem("adminToken");
+                    localStorage.removeItem("authRole"); // remove admin role
                     alert("Logged out successfully!");
+                    updateNavBar(); // refresh navbar immediately
                     window.location.href = "index.html";
-                });
-
-            } else {
-                // User is NOT logged in: Login
-                const loginLi = document.createElement('li');
-                loginLi.innerHTML = '<a href="login.html">Login</a>';
-                navLinks.appendChild(loginLi);
+                };
+            }
+            else if (token && role === "admin") {
+                // Admin should still see Login on homepage
+                navLinks.innerHTML += `<li><a href="login.html">Login</a></li>`;
+            }
+            // NO LOGIN
+            else {
+                navLinks.innerHTML += `<li><a href="login.html">Login</a></li>`;
             }
         }
-        
+
         // CART & PRODUCT RENDERING LOGIC
         async function handleAddToCart(productId) {
-            const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('authToken');
+    const adminToken = localStorage.getItem('adminToken');
+    const role = localStorage.getItem('authRole');
 
-            // 1. Authentication Check
-            if (!authToken) {
-                alert("You must be logged in to add items to the cart.");
-                window.location.href = "login.html";
-                return;
-            }
-
-            try {
-                const res = await fetch('/api/cart', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({
-                        productId: productId,
-                        quantity: 1
-                    })
-                });
-
-                // 2. Token Validity Check
-                if (res.status === 401) {
-                    alert("Session expired. Please log in again.");
-                    localStorage.removeItem('authToken');
-                    window.location.href = "login.html";
-                    return;
-                }
-
-                if (res.ok) {
-                    alert("Product added to cart!");
-                } else {
-                    const error = await res.json();
-                    alert(`Failed to add to cart: ${error.message || 'Server error'}`);
-                }
-            } catch (error) {
-                console.error('Network error adding to cart:', error);
-                alert('An unexpected error occurred.');
-            }
+    // Block non-customers (admins or logged-out users)
+    if (!authToken || role !== 'customer') {
+        if (adminToken) {
+            alert("Admins cannot add products to cart.");
+        } else {
+            alert("You must be logged in as a customer to add items to the cart.");
         }
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ productId, quantity: 1 })
+        });
+
+        if (res.status === 401) {
+            alert("Session expired. Please log in again.");
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authRole');
+            updateNavBar();
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (res.ok) alert("Product added to cart!");
+        else {
+            const error = await res.json();
+            alert(`Failed to add to cart: ${error.message || 'Server error'}`);
+        }
+    } catch (error) {
+        console.error('Network error adding to cart:', error);
+        alert('An unexpected network error occurred.');
+    }
+}
 
         function renderProducts(list) {
             grid.innerHTML = '';
