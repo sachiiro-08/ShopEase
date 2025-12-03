@@ -25,6 +25,14 @@
   </main>
   
 <script>
+    const token = localStorage.getItem("authToken");
+    const role = localStorage.getItem("authRole");
+
+    if (!token || role !== "admin") {
+        alert("Unauthorized access.");
+        window.location.href = "login.html";
+    }
+
     //safely format the address
     function formatAddress(address) {
         if (!address || !address.street) return '— No Address Saved —';
