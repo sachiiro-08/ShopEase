@@ -3,27 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin-Orders - ShopEase</title>
-  <link rel="stylesheet" href="css/admin.css">
+  <title>ShopEase Admin Dashboard</title>
+  <link rel="stylesheet" href="css/admin-dashboard.css">
 </head>
 <body>
-  <header class="admin-header">
+<header class="admin-header">
     <div class="brand">ShopEase Admin</div>
     <nav class="admin-nav">
-      <a href="admin-dashboard.html">Dashboard</a>
-      <a href="admin-products.html">Products</a>
-      <a href="admin-orders.html" class="active">Orders</a>
-      <a href="admin-users.html">Users</a>
-      <a href="admin-userfeedback.html">User Feedback</a>
-      <a href="../login.html">Logout</a>
+        <a href="admin-dashboard.html" class="active">Dashboard</a>
+        <a href="admin-products.html">Products</a>
+        <a href="admin-orders.html">Orders</a>
+        <a href="admin-users.html">Users</a>
+        <a href="admin-userfeedback.html">User Feedback</a>
+        <a href="../login.html">Logout</a>
     </nav>
-  </header>
+</header>
 
-  <main class="admin-orders">
-    <h1>Manage Orders</h1>
-    <div id="order-list" class="grid grid-3"></div>
-  </main>
-  
+<main class="dashboard-main">
+    <h1>Welcome, Alexa!</h1>
+    
+    <div class="dashboard-cards">
+        
+        <!-- PRODUCTS CARD -->
+        <a href="admin-products.html" class="card-link">
+            <div class="card" id="products-card">
+                <h2>Total Products</h2>
+                <p id="total-products">...</p>
+            </div>
+        </a>
+
+        <!-- ORDERS CARD -->
+        <a href="admin-orders.html" class="card-link">
+            <div class="card" id="orders-card">
+                <h2>Total Orders</h2>
+                <p id="total-orders">...</p>
+            </div>
+        </a>
+
+        <!-- USERS CARD -->
+        <a href="admin-users.html" class="card-link">
+            <div class="card" id="users-card">
+                <h2>Total Users</h2>
+          
+                <p id="total-users">...</p>
+            </div>
+        </a>
+
+    </div>
+</main>
+
 <script>
     const token = localStorage.getItem("authToken");
     const role = localStorage.getItem("authRole");
@@ -33,68 +61,37 @@
         window.location.href = "login.html";
     }
 
-    //safely format the address
-    function formatAddress(address) {
-        if (!address || !address.street) return '— No Address Saved —';
-        return `${address.street}, ${address.municipality}, ${address.province}`;
-    }
-    
-    async function loadOrders() {
-      const res = await fetch('/admin/api/orders');
-      const orders = await res.json();
-      const container = document.getElementById('order-list');
-      container.innerHTML = '';
+    async function loadDashboardData() {
+        try {
+            const token = localStorage.getItem('authToken');
+            
+            const res = await fetch('/api/dashboard/stats', {
+                headers: {
+                    Authorization: `Bearer ${token}`, 
+                },
+            });
 
-      orders.forEach(order => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <div class="order-summary"> 
-              <h3 class="order-id">Order ID: ${order._id}</h3>
-            </div>
-          <p class="ordercus"><strong>Customer:</strong> ${order.customerName} (${order.email})</p>
-        
-          <div class="delivery-info">
-              <p style="margin: 0;"><strong>Delivery Address:</strong></p>
-              <p style="margin: 0; font-weight: bold; color: #007bff;">
-                ${formatAddress(order.shippingAddress)}
-              </p>
-          </div>
-          <p class="orderprod"><strong>Product(s):</strong> ${order.products.map(p => 
-            `${p.name || (p.productId && p.productId.name) || 'Unknown'} (x${p.quantity || 1})`
-          ).join(', ')}</p>
-          <p class="tot"><strong>Total:</strong> ₱${Number(order.totalPrice).toFixed(2)}</p>
-          <p class="stat"><strong>Status:</strong>
-            <select onchange="updateStatus('${order._id}', this.value)">
-              <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
-              <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-              <option value="Completed" ${order.status === 'Completed' ? 'selected' : ''}>Completed</option>
-              <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-            </select>
-          </p>
-          <button class="btn delete" onclick="deleteOrder('${order._id}')">Delete Order</button>
-        `;
-        container.appendChild(card);
-      });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({})); 
+                throw new Error(errorData.message || 'Failed to fetch dashboard data. Status: ' + res.status);
+            }
+
+            const data = await res.json();
+            
+            document.getElementById('total-products').innerText = data.totalProducts;
+            document.getElementById('total-orders').innerText = data.totalOrders;
+            document.getElementById('total-users').innerText = data.totalUsers;
+
+        } catch (err) {
+            console.error('Error loading dashboard data:', err);
+            // Fallback for visual confirmation if the API fails
+            document.getElementById('total-products').innerText = 'API Error';
+            document.getElementById('total-orders').innerText = 'API Error';
+            document.getElementById('total-users').innerText = 'API Error';
+        }
     }
 
-    async function updateStatus(id, status) {
-      await fetch(`/admin/api/orders/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      loadOrders();
-    }
-
-    async function deleteOrder(id) {
-      if (!confirm('Are you sure you want to delete this order?')) return;
-      await fetch(`/admin/api/orders/${id}`, { method: 'DELETE' });
-      loadOrders();
-    }
-
-    loadOrders();
+    loadDashboardData();
 </script>
-
 </body>
 </html>
