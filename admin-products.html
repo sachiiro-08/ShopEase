@@ -47,6 +47,14 @@
 </main>
 
 <script>
+    const token = localStorage.getItem("authToken");
+    const role = localStorage.getItem("authRole");
+
+    if (!token || role !== "admin") {
+        alert("Unauthorized access.");
+        window.location.href = "login.html";
+    }
+
     // Utility function to reset the form state
     function resetForm() {
         const form = document.getElementById('product-form');
@@ -173,10 +181,8 @@
 
         document.querySelector('.btn.primary').textContent = 'Update Product';
 
-        // Clear the file input so the user only uploads a new image if they choose to
         document.getElementById('product-image').value = '';
         
-        // Scroll to the top of the form for better UX
         document.getElementById('product-form').scrollIntoView({ behavior: 'smooth' });
     };
     // --- END SECURITY IMPROVEMENT ---
